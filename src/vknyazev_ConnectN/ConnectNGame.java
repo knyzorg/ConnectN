@@ -21,84 +21,87 @@ public class ConnectNGame {
 	 */
 	public int[] getLastTurn() {
 		return lastTurn;
-	}
+	} // getLastTurn
 
 	/**
 	 * @param lastTurn the lastTurn to set
 	 */
 	public void setLastTurn(int[] lastTurn) {
 		this.lastTurn = lastTurn;
-	}
+	} // setLastTurn
 
 	/**
 	 * @return the boardState
 	 */
 	public char[][] getBoardState() {
 		return boardState;
-	}
+	} // getBoardState
 
 	/**
 	 * @param boardState the boardState to set
 	 */
 	public void setBoardState(char[][] boardState) {
 		this.boardState = boardState;
-	}
+	} // setBoardState
 
 	/**
 	 * @return the saveFile
 	 */
 	public File getSaveFile() {
 		return saveFile;
-	}
+	} // getSaveFile
 
 	/**
 	 * @param saveFile the saveFile to set
 	 */
 	public void setSaveFile(File saveFile) {
 		this.saveFile = saveFile;
-	}
+	} // setSaveFile
 
 	/**
+	 * This method is mostly present for internal use. Avoid using.
+	 * @deprecated Should be avoided in favor of getCurrentPlayer()
 	 * @return the currentPlayerIndex
 	 */
 	public int getCurrentPlayerIndex() {
 		return currentPlayerIndex;
-	}
+	} // getCurrentPlayerIndex
 
 	/**
+	 * This method is mostly present for internal use. Avoid using.
 	 * @param currentPlayerIndex the currentPlayerIndex to set
 	 */
 	public void setCurrentPlayerIndex(int currentPlayerIndex) {
 		this.currentPlayerIndex = currentPlayerIndex;
-	}
+	} // setCurrentPlayerIndex
 
 	/**
 	 * @return the players
 	 */
 	public Player[] getPlayers() {
 		return players;
-	}
+	} // getPlayers
 
 	/**
 	 * @param players the players to set
 	 */
 	public void setPlayers(Player[] players) {
 		this.players = players;
-	}
+	} // setPlayers
 
 	/**
 	 * @return the n
 	 */
 	public int getN() {
 		return n;
-	}
+	} // getN
 
 	/**
 	 * @param n the n to set
 	 */
 	public void setN(int n) {
 		this.n = n;
-	}
+	} // setN
 
 	/**
 	 * Create a new playable board
@@ -109,7 +112,7 @@ public class ConnectNGame {
 	public ConnectNGame(int rows, int cols, int n) {
 		this.boardState = new char[rows][cols];
 		this.n = n;
-	}
+	} // ConnectNGame
 
 	/**
 	 * Load game from a file
@@ -118,7 +121,7 @@ public class ConnectNGame {
 	public ConnectNGame(File loadFile) {
 		// TODO: Generate board from file
 		this.saveFile = loadFile;
-	}
+	} // ConnectNGame
 
 	enum PlayResult { Okay, OutOfBoundsColumn, OutOfBoundsRow, CheckerAlreadyPlaced, Illegal };
 
@@ -132,14 +135,14 @@ public class ConnectNGame {
 
 		if (row > this.boardState.length || row < 1) {
 			return PlayResult.OutOfBoundsRow;
-		}
+		} // if
 		if (col > this.boardState[0].length || col < 1) {
 			return PlayResult.OutOfBoundsColumn;
-		}
+		} // if
 		
 		if (this.boardState[row-1][col-1] != '\u0000') {
 			return PlayResult.CheckerAlreadyPlaced;
-		}
+		} // if
 
 		
 		this.boardState[row-1][col-1] = this.getCurrentPlayer().getColor();
@@ -153,10 +156,10 @@ public class ConnectNGame {
 			this.undo();
 			// Report it as such
             return PlayResult.Illegal;
-		}
+		} // if
 		
 		return PlayResult.Okay;
-	}
+	} // play
 
 	/**
 	 * Checks if the entire board has been filled up
@@ -169,12 +172,16 @@ public class ConnectNGame {
 				if (boardState[row][col] == '\u0000')
 					// Empty cell found. Is not full.
 					return false;
-			}
-		}
+			} // for
+		} // for
 
 		return true;
-	}
+	} // isBoardFull
 
+	/**
+	 * Determines the game state based on the board. It Determines if it is valid and playable.
+	 * @return the state of the game
+	 */
 	public GameState getGameState() {
 		// TODO: Add verification for end game
 		// TODO: Add verification for invalid setup
@@ -184,7 +191,7 @@ public class ConnectNGame {
 
 		// Assume playable if not anything else
 		return GameState.Playable;
-	}
+	} // getGameState
 
 	/**
 	 * Retrieves the current player based on the current player index
@@ -192,7 +199,7 @@ public class ConnectNGame {
 	 */
 	public Player getCurrentPlayer() {
 		return this.players[this.currentPlayerIndex];
-	}
+	} // getCurrentPlayer
 
 	/**
 	 * Saves the game to whatever file it was setup to use
@@ -229,23 +236,27 @@ public class ConnectNGame {
                 char checker = this.boardState[row][col];
                 // Leave 'E' if there is no checker. Otherwise, print checker. End line with either \n or ~ depending if it's the last element
                 fw.write((checker == '\u0000' ? "E" : checker) + (col == this.getBoardDimensions()[1] - 1 ? "\n" : "~"));
-			}
-        }
+			} // for
+        } // for
 
 		// Done!
 		fw.close();
-	}
+	} // save
 
 	/**
 	 * Changes currently player by flipping the index between 0 and 1
 	 */
 	private void alternateTurn() {
 		this.currentPlayerIndex = (this.currentPlayerIndex+1) % 2;
-	}
+	} // alternateTurn
 
+	/**
+	 * Retrieves the dimensions of the playing board
+	 * @return A tuple of the dimensions of the board in the format (row size, column size)
+	 */
 	public int[] getBoardDimensions() {
 		return new int[]{this.boardState.length, this.boardState[0].length};
-	}
+	} // getBoardDimensions
 
 	/**
 	 * Undoes the previous turn
@@ -263,5 +274,5 @@ public class ConnectNGame {
 			// No turn to undo. Report failure.
 			return false;
 		}
-	}
+	} // undo
 }

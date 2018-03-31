@@ -8,9 +8,9 @@ import vknyazev_ConnectN.ConnectNGame.GameState;
 import vknyazev_ConnectN.ConnectNGame.PlayResult;
 
 /**
- * ConnectNGameCLI
+ * ConnectNGameInterface
  */
-public class ConnectNGameCLI {
+public class ConnectNGameInterface {
     ConnectNGame game;
 
     /**
@@ -136,7 +136,7 @@ public class ConnectNGameCLI {
         return game;
     } // createGameInteractively
 
-    public ConnectNGameCLI() {
+    public ConnectNGameInterface() {
 
         System.out.println("Welcome to Heritage Connect-N");
 
@@ -162,6 +162,7 @@ public class ConnectNGameCLI {
                 // Save the game
                 try {
                     this.game.save();
+                    System.out.println("Game state has been saved to the file.");
                 } catch (Exception e) {
                     e.getStackTrace();
                 }
@@ -183,9 +184,9 @@ public class ConnectNGameCLI {
 
         keyboard.close();
 
-    } // ConnectNGameCLI
+    } // ConnectNGameInterface
 
     public static void main(String[] args) {
-        ConnectNGameCLI cli = new ConnectNGameCLI();
+        ConnectNGameInterface cli = new ConnectNGameInterface();
     } // main
 }

@@ -11,7 +11,7 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "stopOnEntry": false,
-            "mainClass": "vknyazev_ConnectN.ConnectNGameCLI",
+            "mainClass": "vknyazev_ConnectN.ConnectNGameInterface",
             "args": ""
         }
     ]
