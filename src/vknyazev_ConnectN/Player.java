@@ -1,7 +1,8 @@
 package vknyazev_ConnectN;
 
-import java.util.Scanner;
-
+/**
+ * The Player is a logic-less class for a name and a color defined by a single character 
+ */
 public class Player {
 	private String name;
 	private char color;
