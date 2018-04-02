@@ -13,6 +13,16 @@
             "stopOnEntry": false,
             "mainClass": "vknyazev_ConnectN.ConnectNGameInterface",
             "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Run CLI with sample data",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "mainClass": "vknyazev_ConnectN.ConnectNGameInterface",
+            "args": "< testdata.txt"
         }
     ]
 }

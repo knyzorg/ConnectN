@@ -3,6 +3,7 @@ package vknyazev_ConnectN;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class ConnectNGame {
 	enum GameState {
@@ -118,8 +119,39 @@ public class ConnectNGame {
 	 * Load game from a file
 	 * @param loadFile file to load from
 	 */
-	public ConnectNGame(File loadFile) {
-		// TODO: Generate board from file
+	public ConnectNGame(File loadFile) throws IOException {
+		Scanner gameLoader = new Scanner(loadFile);
+		int rows = gameLoader.nextInt();
+		int cols = gameLoader.nextInt();
+		int n = gameLoader.nextInt();
+		this.boardState = new char[rows][cols];
+		this.n = n;
+
+		// flush trailing new line
+		gameLoader.nextLine();
+
+		Player player1 = new Player(gameLoader.nextLine(), 'Y');
+		Player player2 = new Player(gameLoader.nextLine(), 'R');
+		this.players = new Player[] { player1, player2 };
+
+		this.currentPlayerIndex = gameLoader.nextInt();
+		// flush trailing new line
+		gameLoader.nextLine();
+
+		// Read the board into a buffer
+		StringBuffer textBoardBuffer = new StringBuffer();
+		while (gameLoader.hasNextLine())
+			textBoardBuffer.append(gameLoader.nextLine() + "\n");
+
+		String[] textBoardRows = textBoardBuffer.toString().split("\n");
+		for (int row = 0; row < rows; row++) {
+			String[] cells = textBoardRows[row].split("~");
+			for (int col = 0; col < cols; col++) {
+				char cell = cells[col].charAt(0);
+				setCell(rows - row , col + 1, cell);
+			}
+		}
+
 		this.saveFile = loadFile;
 	} // ConnectNGame
 
@@ -147,6 +179,10 @@ public class ConnectNGame {
 			return PlayResult.CheckerAlreadyPlaced;
 
 		setCell(row, col, this.getCurrentPlayer().getColor());
+
+		// backup last turn in case it needs to be restored
+		int[] lastTurnBackup = this.lastTurn;
+
 		this.lastTurn = new int[] { row, col };
 		this.alternateTurn();
 
@@ -154,12 +190,132 @@ public class ConnectNGame {
 		if (this.getGameState() == GameState.Invalid) {
 			// Move was bad. Undo it.
 			this.undo();
+
+			// Restore last turn
+			this.lastTurn = lastTurnBackup;
+
 			// Report it as such
 			return PlayResult.Illegal;
 		} // if
 
+		// If the move caused a victory, rotate the turn to make acc
+		if (this.getGameState() == GameState.Ended)
+			this.alternateTurn();
+
 		return PlayResult.Okay;
 	} // play
+
+	/**
+	 * Checks if there are n checkers in a row in a diagonal from the upper left to the bottom right
+	 */
+	private boolean checkDiagLR() {
+		for (int col = this.n; col <= this.getBoardDimensions()[1]; col++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+				char search = getCell(row, col);
+				boolean okay = true;
+
+				if (row == 1 && col == 2)
+					System.out.println("");
+
+				// It is pointless to continue if it is null
+				if (search != '\u0000') {
+					// Check the next (n-1) instances if they match the char
+					for (int cursor = 1; cursor < this.n; cursor++)
+						if (getCell(row + cursor, col - cursor) != search)
+							// At least one does not
+							okay = false;
+
+					// Everything was in order. Good!
+					if (okay)
+						return true;
+				}
+			} // for
+		} // for
+
+		return false;
+	}
+
+	/**
+	 * Checks if there are n checkers in a row in a diagonal from the upper right to the bottom left
+	 */
+	private boolean checkDiagRL() {
+		for (int col = 1; col <= this.getBoardDimensions()[1] - this.n; col++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+				char search = getCell(row, col);
+				boolean okay = true;
+
+				// It is pointless to continue if it is null
+				if (search != '\u0000') {
+					// Check the next (n-1) instances if they match the char
+					for (int cursor = 1; cursor < this.n; cursor++)
+						if (getCell(row + cursor, col + cursor) != search)
+							// At least one does not
+							okay = false;
+
+					// Everything was in order. Good!
+					if (okay)
+						return true;
+				}
+			} // for
+		} // for
+
+		return false;
+	}
+
+	/**
+	 * Checks if there are n checkers in a row in a column (Vertical)
+	 */
+	private boolean checkColumns() {
+		for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+				char search = getCell(row, col);
+				boolean okay = true;
+
+				// It is pointless to continue if it is null
+				if (search != '\u0000') {
+					// Check the next (n-1) instances if they match the char
+					for (int cursor = 1; cursor < this.n; cursor++)
+						if (getCell(row + cursor, col) != search)
+							// At least one does not
+							okay = false;
+
+					// Everything was in order. Good!
+					if (okay)
+						return true;
+				}
+			} // for
+		} // for
+
+		return false;
+	}
+
+	/**
+	 * Checks if there are n checkers in a row in a column (Vertical)
+	 * @return True if a non-null character is repeated n times in a single row
+	 */
+	private boolean checkRows() {
+		for (int row = 1; row <= this.getBoardDimensions()[0]; row++) {
+			for (int col = 1; col <= this.getBoardDimensions()[1] - this.n; col++) {
+				char search = getCell(row, col);
+				boolean okay = true;
+
+				// It is pointless to continue if it is null
+				if (search != '\u0000') {
+					// Check the next (n-1) instances if they match the char
+					for (int cursor = 1; cursor < this.n; cursor++)
+						if (getCell(row, col + cursor) != search)
+							// At least one does not
+							okay = false;
+
+					// Everything was in order. Good!
+					if (okay)
+						return true;
+				}
+			} // for
+		} // for
+
+		return false;
+	}
 
 	/**
 	 * Determines the game state based on the board. It Determines if it is valid and playable.
@@ -168,10 +324,9 @@ public class ConnectNGame {
 	public GameState getGameState() {
 
 		// Check for floating checkers
-
-		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
+		for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
 			boolean hasStanding = true;
-			for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0]; row++) {
 				if (getCell(row, col) == '\u0000')
 					// Nothing to stand on anymore
 					hasStanding = false;
@@ -181,16 +336,44 @@ public class ConnectNGame {
 			} // for
 		} // for
 
+		// n < dimensions
+		if (this.getBoardDimensions()[1] < n || this.getBoardDimensions()[0] < n)
+			return GameState.Invalid;
+
+		// 8 <= n >= 3
+		if (3 > n || 8 < n)
+			return GameState.Invalid;
+
+		// 4 <= dimensions <= 12
+		if (this.getBoardDimensions()[1] > 12 || this.getBoardDimensions()[0] > 12 || this.getBoardDimensions()[1] < 4
+				|| this.getBoardDimensions()[0] < 4)
+			return GameState.Invalid;
+
+		// Check each victory condition (Separated for simplified debugging)
+
+		if (checkRows())
+			return GameState.Ended;
+
+		if (checkColumns())
+			return GameState.Ended;
+
+		if (checkDiagRL())
+			return GameState.Ended;
+
+		if (checkDiagLR())
+			return GameState.Ended;
+
 		// Check for fullness
 		boolean isFull = true;
 		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
-			for (int col = 0; col <= this.getBoardDimensions()[1]; col++) {
+			for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
 				if (getCell(row, col) == '\u0000')
 					// Empty cell found. Is not full.
 					isFull = false;
 			} // for
 		} // for
 
+		// Since is full and not victory condition, declare tie
 		if (isFull)
 			return GameState.EndedTie;
 
@@ -213,11 +396,14 @@ public class ConnectNGame {
 		FileWriter fw = new FileWriter(this.saveFile);
 
 		// Write rows
-		fw.write(String.valueOf(this.getBoardDimensions()[0]));
+		int rows = this.getBoardDimensions()[0];
+		int cols = this.getBoardDimensions()[1];
+
+		fw.write(String.valueOf(rows));
 		fw.write("\n");
 
 		// Write columns
-		fw.write(String.valueOf(this.getBoardDimensions()[1]));
+		fw.write(String.valueOf(cols));
 		fw.write("\n");
 
 		// Write 'N'
@@ -235,12 +421,13 @@ public class ConnectNGame {
 		fw.write("\n");
 
 		// Save the board
-		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
-			for (int col = 0; col <= this.getBoardDimensions()[1]; col++) {
+		for (int row = rows; row > 0; row--) {
+			for (int col = 1; col <= cols; col++) {
 				char checker = getCell(row, col);
 				// Leave 'E' if there is no checker. Otherwise, print checker. End line with either \n or ~ depending if it's the last element
-				fw.write(
-						(checker == '\u0000' ? "E" : checker) + (col == this.getBoardDimensions()[1] - 1 ? "\n" : "~"));
+				String checkerValue = (checker == '\u0000' ? "E" : String.valueOf(checker));
+				boolean isLastCellInRow = col == cols;
+				fw.write(checkerValue + (isLastCellInRow ? "\n" : "~"));
 			} // for
 		} // for
 
@@ -283,6 +470,8 @@ public class ConnectNGame {
 
 	/**
 	 * Recommended method to retrieve the value of specific point
+	 * @param row Index of the row between 1 and the height of the board
+	 * @param col Index of the column between 1 and the width of the board
 	 * @return Either color char that was played or the null character \u0000
 	 */
 	public char getCell(int row, int col) {
@@ -295,6 +484,8 @@ public class ConnectNGame {
 
 	/**
 	 * Recommended method to set the value of specific point
+	 * @param row Index of the row between 1 and the height of the board
+	 * @param col Index of the column between 1 and the width of the board
 	 */
 	public void setCell(int row, int col, char value) {
 		boardState[row - 1][col - 1] = value;
