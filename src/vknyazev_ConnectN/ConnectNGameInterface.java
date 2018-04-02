@@ -67,12 +67,13 @@ public class ConnectNGameInterface {
     } // renderBoard
 
     /**
-     * Checks if the game has ended by checking the game state against Ended and EndedTie GameStates
+     * Checks if the game has ended by checking the game state against Ended, EndedTie and Invalid GameStates
      */
     private boolean hasGameEnded() {
         switch (this.game.getGameState()) {
         case Ended:
         case EndedTie:
+        case Invalid:
             return true;
         default:
             return false;
