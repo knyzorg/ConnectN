@@ -148,7 +148,10 @@ public class ConnectNGame {
 			String[] cells = textBoardRows[row].split("~");
 			for (int col = 0; col < cols; col++) {
 				char cell = cells[col].charAt(0);
-				setCell(rows - row , col + 1, cell);
+
+				// Leave 'E' as null
+				if (cell != 'E')
+					setCell(rows - row , col + 1, cell);
 			}
 		}
 

@@ -91,7 +91,7 @@ public class ConnectNGameInterface {
 
         while (game == null) {
             System.out.println("Please enter N to start a new game or R to resume the game stored in currentGame.txt");
-            option = keyboard.next().charAt(0);
+            option = keyboard.nextLine().charAt(0);
             switch (Character.toUpperCase(option)) {
             case 'R':
                 try {
@@ -120,8 +120,8 @@ public class ConnectNGameInterface {
 
                 System.out.print("Enter the value for N, the number of checkers in a row for a win: ");
                 int nValue = keyboard.nextInt();
-                while (3 > nValue || 8 < nValue) {
-                    System.err.println("Please enter an N-value between 3 and 8");
+                while (nValue < 3 || nValue > 8) {
+                    System.err.print("Please enter an N-value between 3 and 8 -> ");
                     numCols = keyboard.nextInt();
                 }
 
@@ -143,6 +143,7 @@ public class ConnectNGameInterface {
             } // switch
         } // while
 
+
         return game;
     } // createGameInteractively
 
@@ -153,6 +154,7 @@ public class ConnectNGameInterface {
         this.game = createGameInteractively();
         this.game.setSaveFile(new File("currentGame.txt"));
         System.out.println("Type Q at any time to exit the game, S to save the game or U to undo the game");
+        
 
         while (!this.hasGameEnded()) {
 
