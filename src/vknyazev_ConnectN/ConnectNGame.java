@@ -123,7 +123,9 @@ public class ConnectNGame {
 		this.saveFile = loadFile;
 	} // ConnectNGame
 
-	enum PlayResult { Okay, OutOfBoundsColumn, OutOfBoundsRow, CheckerAlreadyPlaced, Illegal };
+	enum PlayResult {
+		Okay, OutOfBoundsColumn, OutOfBoundsRow, CheckerAlreadyPlaced, Illegal
+	};
 
 	/**
 	 * Marks a column and row with the color character of the current player rotates the turn if play was valid
@@ -133,60 +135,63 @@ public class ConnectNGame {
 	 */
 	public PlayResult play(int row, int col) {
 
-		if (row > this.boardState.length || row < 1) {
-			return PlayResult.OutOfBoundsRow;
-		} // if
-		if (col > this.boardState[0].length || col < 1) {
-			return PlayResult.OutOfBoundsColumn;
-		} // if
-		
-		if (this.boardState[row-1][col-1] != '\u0000') {
-			return PlayResult.CheckerAlreadyPlaced;
-		} // if
+		int[] dimensions = getBoardDimensions();
 
-		
-		this.boardState[row-1][col-1] = this.getCurrentPlayer().getColor();
-		this.lastTurn = new int[]{row-1, col-1};
+		if (row > dimensions[0] || row < 1)
+			return PlayResult.OutOfBoundsRow;
+
+		if (col > dimensions[1] || col < 1)
+			return PlayResult.OutOfBoundsColumn;
+
+		if (getCell(row, col) != '\u0000')
+			return PlayResult.CheckerAlreadyPlaced;
+
+		setCell(row, col, this.getCurrentPlayer().getColor());
+		this.lastTurn = new int[] { row, col };
 		this.alternateTurn();
 
-
-        // Check if game state is still valid
-        if (this.getGameState() == GameState.Invalid) {
+		// Check if game state is still valid
+		if (this.getGameState() == GameState.Invalid) {
 			// Move was bad. Undo it.
 			this.undo();
 			// Report it as such
-            return PlayResult.Illegal;
+			return PlayResult.Illegal;
 		} // if
-		
+
 		return PlayResult.Okay;
 	} // play
-
-	/**
-	 * Checks if the entire board has been filled up
-	 * @return True if the board is full
-	 */
-	private boolean isBoardFull() {
-		for (int row = 0; row < boardState.length; row++) {
-			for (int col = 0; col < boardState[0].length; col++) {
-				// TODO: Refactor with accessor
-				if (boardState[row][col] == '\u0000')
-					// Empty cell found. Is not full.
-					return false;
-			} // for
-		} // for
-
-		return true;
-	} // isBoardFull
 
 	/**
 	 * Determines the game state based on the board. It Determines if it is valid and playable.
 	 * @return the state of the game
 	 */
 	public GameState getGameState() {
-		// TODO: Add verification for end game
-		// TODO: Add verification for invalid setup
 
-		if (isBoardFull())
+		// Check for floating checkers
+
+		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
+			boolean hasStanding = true;
+			for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
+				if (getCell(row, col) == '\u0000')
+					// Nothing to stand on anymore
+					hasStanding = false;
+				else if (!hasStanding)
+					// Nothing to stand on and attempt to
+					return GameState.Invalid;
+			} // for
+		} // for
+
+		// Check for fullness
+		boolean isFull = true;
+		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
+			for (int col = 0; col <= this.getBoardDimensions()[1]; col++) {
+				if (getCell(row, col) == '\u0000')
+					// Empty cell found. Is not full.
+					isFull = false;
+			} // for
+		} // for
+
+		if (isFull)
 			return GameState.EndedTie;
 
 		// Assume playable if not anything else
@@ -215,7 +220,6 @@ public class ConnectNGame {
 		fw.write(String.valueOf(this.getBoardDimensions()[1]));
 		fw.write("\n");
 
-
 		// Write 'N'
 		fw.write(String.valueOf(this.n));
 		fw.write("\n");
@@ -231,13 +235,14 @@ public class ConnectNGame {
 		fw.write("\n");
 
 		// Save the board
-        for (int row = this.getBoardDimensions()[0] - 1; row >= 0; row--) {
-            for (int col = 0; col < this.getBoardDimensions()[1]; col++) {
-                char checker = this.boardState[row][col];
-                // Leave 'E' if there is no checker. Otherwise, print checker. End line with either \n or ~ depending if it's the last element
-                fw.write((checker == '\u0000' ? "E" : checker) + (col == this.getBoardDimensions()[1] - 1 ? "\n" : "~"));
+		for (int row = this.getBoardDimensions()[0]; row > 0; row--) {
+			for (int col = 0; col <= this.getBoardDimensions()[1]; col++) {
+				char checker = getCell(row, col);
+				// Leave 'E' if there is no checker. Otherwise, print checker. End line with either \n or ~ depending if it's the last element
+				fw.write(
+						(checker == '\u0000' ? "E" : checker) + (col == this.getBoardDimensions()[1] - 1 ? "\n" : "~"));
 			} // for
-        } // for
+		} // for
 
 		// Done!
 		fw.close();
@@ -247,7 +252,7 @@ public class ConnectNGame {
 	 * Changes currently player by flipping the index between 0 and 1
 	 */
 	private void alternateTurn() {
-		this.currentPlayerIndex = (this.currentPlayerIndex+1) % 2;
+		this.currentPlayerIndex = (this.currentPlayerIndex + 1) % 2;
 	} // alternateTurn
 
 	/**
@@ -255,7 +260,7 @@ public class ConnectNGame {
 	 * @return A tuple of the dimensions of the board in the format (row size, column size)
 	 */
 	public int[] getBoardDimensions() {
-		return new int[]{this.boardState.length, this.boardState[0].length};
+		return new int[] { this.boardState.length, this.boardState[0].length };
 	} // getBoardDimensions
 
 	/**
@@ -265,7 +270,7 @@ public class ConnectNGame {
 	public boolean undo() {
 		if (this.lastTurn != null) {
 			// Set last turn's checker to null
-			this.boardState[lastTurn[0]][lastTurn[1]] = '\u0000';
+			setCell(lastTurn[0], lastTurn[1], '\u0000');
 			// Go to other player
 			this.alternateTurn();
 			// Report success
@@ -275,4 +280,23 @@ public class ConnectNGame {
 			return false;
 		}
 	} // undo
+
+	/**
+	 * Recommended method to retrieve the value of specific point
+	 * @return Either color char that was played or the null character \u0000
+	 */
+	public char getCell(int row, int col) {
+		try {
+			return boardState[row - 1][col - 1];
+		} catch (Exception e) {
+			return '\u0000';
+		} // try
+	} // getCell
+
+	/**
+	 * Recommended method to set the value of specific point
+	 */
+	public void setCell(int row, int col, char value) {
+		boardState[row - 1][col - 1] = value;
+	} // getCell
 }

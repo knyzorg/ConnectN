@@ -12,15 +12,7 @@ import vknyazev_ConnectN.ConnectNGame.PlayResult;
  */
 public class ConnectNGameInterface {
     ConnectNGame game;
-
-    /**
-     * Saves the game to a file
-     * @param fileName File to use to save the game
-     */
-    private void saveToFile(String fileName) {
-        File saveFile = new File(fileName);
-        game.setSaveFile(saveFile);
-    }
+    Scanner keyboard = new Scanner(System.in);
 
     /**
      * Attempts to play a checker in a defined position
@@ -51,24 +43,23 @@ public class ConnectNGameInterface {
     } // play
 
     private void renderBoard() {
-        // TODO: Refactor direct array access into accessors
 
         int[] dimensions = this.game.getBoardDimensions();
 
         // Print bulk of the board
-        for (int row = dimensions[0] - 1; row >= 0; row--) {
-            for (int col = 0; col < dimensions[1]; col++) {
-                char checker = this.game.getBoardState()[row][col];
+        for (int row = dimensions[0]; row > 0; row--) {
+            for (int col = 1; col <= dimensions[1]; col++) {
+                char checker = this.game.getCell(row, col);
                 // Leave 'E' space if there is no checker. Otherwise, print checker.
                 System.out.print(" " + (checker == '\u0000' ? "E" : checker));
             } // for
             // Number label the rows
-            System.out.println("| " + (row + 1));
+            System.out.println("| " + (row));
         } // for
 
         // Print footer labels for columns
-        for (int col = 0; col < dimensions[1]; col++) {
-            System.out.print(" " + (col + 1));
+        for (int col = 1; col <= dimensions[1]; col++) {
+            System.out.print(" " + col);
         } // for
 
         // Add line break
@@ -95,7 +86,6 @@ public class ConnectNGameInterface {
     private ConnectNGame createGameInteractively() {
         // Start new or resume game
 
-        Scanner keyboard = new Scanner(System.in);
         char option;
         ConnectNGame game = null;
 
@@ -144,8 +134,8 @@ public class ConnectNGameInterface {
         this.game.setSaveFile(new File("currentGame.txt"));
         System.out.println("Type Q at any time to exit the game, S to save the game or U to undo the game");
 
-        Scanner keyboard = new Scanner(System.in);
-
+        keyboard = new Scanner(System.in);
+        
         while (!this.hasGameEnded()) {
 
             // Display the board
@@ -187,6 +177,6 @@ public class ConnectNGameInterface {
     } // ConnectNGameInterface
 
     public static void main(String[] args) {
-        ConnectNGameInterface cli = new ConnectNGameInterface();
+        new ConnectNGameInterface();
     } // main
 }
