@@ -216,10 +216,6 @@ public class ConnectNGame {
 			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
 				char search = getCell(row, col);
 				boolean okay = true;
-
-				if (row == 1 && col == 2)
-					System.out.println("");
-
 				// It is pointless to continue if it is null
 				if (search != '\u0000') {
 					// Check the next (n-1) instances if they match the char

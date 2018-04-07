@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import org.omg.CORBA.DynAnyPackage.Invalid;
+
 import vknyazev_ConnectN.ConnectNGame.GameState;
 import vknyazev_ConnectN.ConnectNGame.PlayResult;
 
@@ -105,25 +107,44 @@ public class ConnectNGameInterface {
 
                 break;
             case 'N':
-                System.out.print("Enter the number of rows on the game board: ");
-                int numRows = keyboard.nextInt();
+                System.out.println("Enter the number of rows on the game board: ");
+                int numRows = -1;
                 while (numRows < 4 || numRows > 12) {
                     System.err.println("Please enter a row count between 4 and 12");
-                    numRows = keyboard.nextInt();
+                    try {
+                        numRows = keyboard.nextInt();
+                    } catch (Exception e) {
+                        System.err.println("The input value must be a number.");
+                    }
+
                 }
 
-                System.out.print("Enter the number of columns on the game board: ");
-                int numCols = keyboard.nextInt();
+                System.out.println("Enter the number of columns on the game board: ");
+                int numCols = -1;
                 while (numCols < 4 || numCols > 12) {
                     System.err.println("Please enter a column count between 4 and 12");
-                    numCols = keyboard.nextInt();
+                    try {
+                        numCols = keyboard.nextInt();
+                    } catch (Exception e) {
+                        System.err.println("The input value must be a number.");
+                    }
+
                 }
 
-                System.out.print("Enter the value for N, the number of checkers in a row for a win: ");
-                int nValue = keyboard.nextInt();
+                System.out.println("Enter the value for N, the number of checkers in a row for a win: ");
+                int nValue = -1;
                 while (nValue < 3 || nValue > 8) {
                     System.err.print("Please enter an N-value between 3 and 8 -> ");
-                    numCols = keyboard.nextInt();
+                    try {
+                        nValue = keyboard.nextInt();
+                    } catch (Exception e) {
+                        System.err.println("The input value must be a number.");
+                    }
+
+                    if (nValue > numCols || nValue > numCols) {
+                        System.err.println("The value of n must be less than both the row count and column count.");
+                        nValue = -1;
+                    }
                 }
 
                 // Burn left-over line-break
@@ -140,10 +161,9 @@ public class ConnectNGameInterface {
                 game.setPlayers(new Player[] { player1, player2 });
                 break;
             default:
-                System.out.println("Invalid input");
+                System.err.println("Invalid input");
             } // switch
         } // while
-
 
         return game;
     } // createGameInteractively
@@ -155,7 +175,6 @@ public class ConnectNGameInterface {
         this.game = createGameInteractively();
         this.game.setSaveFile(new File("currentGame.txt"));
         System.out.println("Type Q at any time to exit the game, S to save the game or U to undo the game");
-        
 
         while (!this.hasGameEnded()) {
 
@@ -177,6 +196,7 @@ public class ConnectNGameInterface {
                     this.game.save();
                     System.out.println("Game state has been saved to the file.");
                 } catch (Exception e) {
+                    System.err.println("Something went horribly wrong while saving the game state to file.");
                     e.getStackTrace();
                 }
                 break;
@@ -199,7 +219,6 @@ public class ConnectNGameInterface {
             } // switch
         } // while
 
-        System.out.println("Game has ended!");
         // Display the board for the last time
         renderBoard();
         switch (game.getGameState()) {
