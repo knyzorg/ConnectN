@@ -61,7 +61,7 @@ public class ConnectNGameInterface {
 
         // Print footer labels for columns
         for (int col = 1; col <= dimensions[1]; col++) {
-            System.out.print(" " + col);
+            System.out.print(" " + (col % 10));
         } // for
 
         // Add line break
