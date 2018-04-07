@@ -156,6 +156,7 @@ public class ConnectNGame {
 		}
 
 		this.saveFile = loadFile;
+		gameLoader.close();
 	} // ConnectNGame
 
 	enum PlayResult {
