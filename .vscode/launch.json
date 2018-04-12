@@ -6,6 +6,16 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Frame",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "vknyazev_ConnectN.ConnectNFrame",
+            "args": ""
+        },
+        {
+            "type": "java",
             "name": "Run CLI",
             "request": "launch",
             "cwd": "${workspaceFolder}",
