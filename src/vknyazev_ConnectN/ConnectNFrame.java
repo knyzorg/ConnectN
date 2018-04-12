@@ -1,6 +1,7 @@
 package vknyazev_ConnectN;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -32,7 +33,8 @@ public class ConnectNFrame extends JFrame {
 	private JPanel contentPane;
 	private ConnectNGame game;
 	private Player players[];
-
+	
+	JPanel boardPanel = new JPanel();
 	/**
 	 * Launch the application.
 	 */
@@ -127,7 +129,7 @@ public class ConnectNFrame extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		
+
 		loadGame(new File("currentGame.txt"));
 		this.setVisible(true);
 		displayButtons();
@@ -187,28 +189,36 @@ public class ConnectNFrame extends JFrame {
 	}
 
 	private void displayButtons() {
+
 		JButton btnTable[][] = getButtonTableFromState(getCheckerStateTable());
-		JPanel panel = new JPanel();
-		
-		panel.setLayout(new GridLayout(btnTable.length, btnTable[0].length, 0, 0));
+
+		boardPanel.setLayout(new GridLayout(btnTable.length, btnTable[0].length, 0, 0));
 
 		for (int row = btnTable.length - 1; row >= 0; row--)
 			for (int col = 0; col < btnTable[row].length; col++) {
 				final int playRow = row + 1;
 				final int playCol = col + 1;
 
-				this.getContentPane().add(panel);
+				this.getContentPane().add(boardPanel);
 				JButton btn = btnTable[row][col];
 				btn.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						ConnectNGame.PlayResult p = game.play(playRow, playCol);
 						System.out.println(p);
+						
+						boardPanel.removeAll();
+
+						// Re-display board
 						displayButtons();
+
+						// Seems to be required to update visuals
+						revalidate();
 					}
 				});
 
-				panel.add(btn);
+				boardPanel.add(btn);
 			}
+			
 	}
 
 	private JButton[][] getButtonTableFromState(CheckerState state[][]) {
@@ -224,14 +234,16 @@ public class ConnectNFrame extends JFrame {
 					btn.setEnabled(true);
 					break;
 				case Player1:
+					btn.setBackground(Color.YELLOW);
 					break;
 				case Player2:
+					btn.setBackground(Color.RED);
 					break;
 				case Disabled:
 					break;
 				}
-				btn.putClientProperty("row", row+1);
-				btn.putClientProperty("col", col+1);
+				btn.putClientProperty("row", row + 1);
+				btn.putClientProperty("col", col + 1);
 				btnTable[row][col] = btn;
 			}
 
@@ -239,7 +251,7 @@ public class ConnectNFrame extends JFrame {
 	}
 
 	private CheckerState[][] getCheckerStateTable() {
-		char[][] checkers = game.getBoardState();
+
 		int rowCount = game.getBoardDimensions()[0];
 		int colCount = game.getBoardDimensions()[1];
 
@@ -251,7 +263,7 @@ public class ConnectNFrame extends JFrame {
 		// Build locked map
 		for (int row = 0; row < rowCount; row++)
 			for (int col = 0; col < colCount; col++) {
-				char cellValue = game.getCell(row+1, col+1);
+				char cellValue = game.getCell(row + 1, col + 1);
 				CheckerState cellState = CheckerState.Disabled;
 
 				// Cell cell to players
