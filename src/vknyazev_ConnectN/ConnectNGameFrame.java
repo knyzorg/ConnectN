@@ -1,31 +1,13 @@
 package vknyazev_ConnectN;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
+import java.awt.*;
 import vknyazev_ConnectN.ConnectNGame.GameState;
-
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JMenu;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
+import javax.swing.*;
+import java.io.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;;
 
-public class ConnectNFrame extends JFrame {
+public class ConnectNGameFrame extends JFrame {
 	enum CheckerState {
 		Player1, Player2, Disabled, Enabled
 	}
@@ -33,8 +15,9 @@ public class ConnectNFrame extends JFrame {
 	private JPanel contentPane;
 	private ConnectNGame game;
 	private Player players[];
-	
+
 	JPanel boardPanel = new JPanel();
+
 	/**
 	 * Launch the application.
 	 */
@@ -42,7 +25,7 @@ public class ConnectNFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ConnectNFrame frame = new ConnectNFrame();
+					ConnectNGameFrame frame = new ConnectNGameFrame();
 					//frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -54,7 +37,7 @@ public class ConnectNFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ConnectNFrame() {
+	public ConnectNGameFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 691, 412);
 
@@ -126,7 +109,6 @@ public class ConnectNFrame extends JFrame {
 		});
 		mnNewMenu.add(mntmAbout);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
@@ -141,27 +123,41 @@ public class ConnectNFrame extends JFrame {
 	}
 
 	private void menu_file_save() {
-
+		try {
+			this.game.save();
+		} catch (Exception e) {
+			//TODO: handle exception
+		}
+		
 	}
 
 	private void menu_file_restore() {
-
+		try {
+			this.game.restore();
+			displayButtons();
+		} catch (Exception e) {
+			//TODO: handle exception
+		}
+		
 	}
 
 	private void menu_file_new() {
-
+		// TODO
 	}
 
 	private void menu_game_undo() {
-
+		if (this.game.undo())
+			displayButtons();
+		else
+			JOptionPane.showMessageDialog(this, "There is no available undo move.");
 	}
 
 	private void menu_information_help() {
-
+		// TODO
 	}
 
 	private void menu_information_about() {
-
+		// TODO
 	}
 
 	private void loadGame(File loadFile) {
@@ -189,6 +185,7 @@ public class ConnectNFrame extends JFrame {
 	}
 
 	private void displayButtons() {
+		boardPanel.removeAll();
 
 		JButton btnTable[][] = getButtonTableFromState(getCheckerStateTable());
 
@@ -205,20 +202,18 @@ public class ConnectNFrame extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						ConnectNGame.PlayResult p = game.play(playRow, playCol);
 						System.out.println(p);
-						
-						boardPanel.removeAll();
 
 						// Re-display board
 						displayButtons();
 
-						// Seems to be required to update visuals
-						revalidate();
 					}
 				});
 
 				boardPanel.add(btn);
 			}
-			
+
+		// Seems to be required to update visuals
+		revalidate();
 	}
 
 	private JButton[][] getButtonTableFromState(CheckerState state[][]) {
@@ -277,18 +272,18 @@ public class ConnectNFrame extends JFrame {
 			}
 
 		// Unlock playable cells
-		for (int col = 0; col < colCount; col++) {
+		if (this.game.getGameState() == GameState.Playable)
+			for (int col = 0; col < colCount; col++) {
 
-			// Don't even bother if row is full
-			boolean done = checkerState[colCount - 1][col] != CheckerState.Disabled;
+				boolean done = false;
 
-			for (int row = rowCount - 1; row > 0 && !done; row--) {
-				if (checkerState[row - 1][col] != CheckerState.Disabled) {
-					done = true;
-					checkerState[row][col] = CheckerState.Enabled;
-				}
+				for (int row = 0; row < rowCount && !done; row++) {
+					if (checkerState[row][col] == CheckerState.Disabled) {
+						done = true;
+						checkerState[row][col] = CheckerState.Enabled;
+					}
+				} // for
 			} // for
-		} // for
 
 		return checkerState;
 	}

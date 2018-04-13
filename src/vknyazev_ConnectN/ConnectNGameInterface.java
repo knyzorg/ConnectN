@@ -3,10 +3,6 @@ package vknyazev_ConnectN;
 import java.io.File;
 import java.util.Scanner;
 import java.util.StringTokenizer;
-
-import org.omg.CORBA.DynAnyPackage.Invalid;
-
-import vknyazev_ConnectN.ConnectNGame.GameState;
 import vknyazev_ConnectN.ConnectNGame.PlayResult;
 
 /**

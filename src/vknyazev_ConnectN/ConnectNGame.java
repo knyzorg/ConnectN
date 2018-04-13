@@ -10,6 +10,10 @@ public class ConnectNGame {
 		Playable, EndedTie, Ended, Invalid
 	};
 
+	enum PlayResult {
+		Okay, OutOfBoundsColumn, OutOfBoundsRow, CheckerAlreadyPlaced, Illegal
+	};
+
 	private int lastTurn[];
 	private char boardState[][];
 	private File saveFile;
@@ -120,7 +124,17 @@ public class ConnectNGame {
 	 * @param loadFile file to load from
 	 */
 	public ConnectNGame(File loadFile) throws IOException {
-		Scanner gameLoader = new Scanner(loadFile);
+		this.saveFile = loadFile;
+		restore();
+	} // ConnectNGame
+
+
+	/**
+	 * Load game from a file
+	 * @param loadFile file to load from
+	 */
+	public void restore() throws IOException {
+		Scanner gameLoader = new Scanner(this.saveFile);
 		int rows = gameLoader.nextInt();
 		int cols = gameLoader.nextInt();
 		int n = gameLoader.nextInt();
@@ -152,16 +166,12 @@ public class ConnectNGame {
 				// Leave 'E' as null
 				if (cell != 'E')
 					setCell(rows - row , col + 1, cell);
-			}
-		}
+			} // for
+		} // for
 
-		this.saveFile = loadFile;
+
 		gameLoader.close();
-	} // ConnectNGame
-
-	enum PlayResult {
-		Okay, OutOfBoundsColumn, OutOfBoundsRow, CheckerAlreadyPlaced, Illegal
-	};
+	} // loadFromFile
 
 	/**
 	 * Marks a column and row with the color character of the current player rotates the turn if play was valid
