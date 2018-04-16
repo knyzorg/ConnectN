@@ -5,13 +5,15 @@ import vknyazev_ConnectN.ConnectNGame.GameState;
 import javax.swing.*;
 import java.io.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;;
+import java.awt.event.ActionListener;
 
 public class ConnectNGameFrame extends JFrame {
 	enum CheckerState {
 		Player1, Player2, Disabled, Enabled
 	}
 
+	private JTextField player1name;
+	private JTextField player2name;
 	private JPanel contentPane;
 	private ConnectNGame game;
 	private Player players[];
@@ -112,12 +114,8 @@ public class ConnectNGameFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
-		loadGame(new File("currentGame.txt"));
 		this.setVisible(true);
-		JOptionPane.showMessageDialog(this,
-		new ConnectNGameNewGameDialog(), "New Game",
-		JOptionPane.PLAIN_MESSAGE);
-		displayButtons();
+		showNewGameDialog();
 	}
 
 	// Handler methods for menu
@@ -131,7 +129,7 @@ public class ConnectNGameFrame extends JFrame {
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Could not save to file.");
 		}
-		
+
 	}
 
 	private void menu_file_restore() {
@@ -141,11 +139,115 @@ public class ConnectNGameFrame extends JFrame {
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "There is no available game file.");
 		}
-		
+
+	}
+
+	private void showNewGameDialog() {
+
+		JPanel newGamePanelRoot = new JPanel();
+		newGamePanelRoot.setLayout(new BorderLayout(0, 0));
+
+		JPanel newGamePanel = new JPanel();
+		newGamePanelRoot.add(newGamePanel, BorderLayout.NORTH);
+
+		JRadioButton rdbtnLoadFromFile = new JRadioButton("Load from file");
+		newGamePanel.add(rdbtnLoadFromFile);
+		rdbtnLoadFromFile.setSelected(true);
+
+		JRadioButton rdbtnNewGame = new JRadioButton("New Game");
+		newGamePanel.add(rdbtnNewGame);
+
+		ButtonGroup gameSelect = new ButtonGroup();
+		gameSelect.add(rdbtnNewGame);
+		gameSelect.add(rdbtnLoadFromFile);
+
+		JPanel newGamePanel_1 = new JPanel();
+		newGamePanelRoot.add(newGamePanel_1, BorderLayout.CENTER);
+		newGamePanel_1.setLayout(new GridLayout(0, 2, 0, 0));
+
+		JPanel newGamePanel_6 = new JPanel();
+		FlowLayout flowLayout_4 = (FlowLayout) newGamePanel_6.getLayout();
+		flowLayout_4.setAlignment(FlowLayout.LEFT);
+		newGamePanel_1.add(newGamePanel_6);
+
+		JPanel newGamePanel_7 = new JPanel();
+		newGamePanel_6.add(newGamePanel_7);
+
+		JLabel lblPlayerName = new JLabel("Player 1 name:");
+		newGamePanel_7.add(lblPlayerName);
+
+		player1name = new JTextField();
+		newGamePanel_7.add(player1name);
+		player1name.setColumns(10);
+
+		JPanel newGamePanel_4 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) newGamePanel_4.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		newGamePanel_1.add(newGamePanel_4);
+
+		JPanel newGamePanel_10 = new JPanel();
+		newGamePanel_4.add(newGamePanel_10);
+
+		JLabel lblRows = new JLabel("Rows:");
+		newGamePanel_10.add(lblRows);
+
+		JSpinner spinner = new JSpinner();
+		newGamePanel_10.add(spinner);
+		spinner.setModel(new SpinnerNumberModel(5, 4, 8, 1));
+
+		JPanel newGamePanel_9 = new JPanel();
+		newGamePanel_4.add(newGamePanel_9);
+
+		JLabel lblColumns = new JLabel("Columns:");
+		newGamePanel_9.add(lblColumns);
+
+		JSpinner spinner_1 = new JSpinner();
+		newGamePanel_9.add(spinner_1);
+
+		JPanel newGamePanel_3 = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) newGamePanel_3.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		newGamePanel_1.add(newGamePanel_3);
+
+		JPanel newGamePanel_5 = new JPanel();
+		newGamePanel_3.add(newGamePanel_5);
+		FlowLayout flowLayout_3 = (FlowLayout) newGamePanel_5.getLayout();
+		flowLayout_3.setAlignment(FlowLayout.LEFT);
+
+		JLabel lblPlayerName_1 = new JLabel("Player 2 name:");
+		newGamePanel_5.add(lblPlayerName_1);
+
+		player2name = new JTextField();
+		newGamePanel_5.add(player2name);
+		player2name.setColumns(10);
+
+		JPanel newGamePanel_2 = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) newGamePanel_2.getLayout();
+		flowLayout_2.setAlignment(FlowLayout.LEFT);
+		newGamePanel_1.add(newGamePanel_2);
+
+		JPanel newGamePanel_8 = new JPanel();
+		newGamePanel_2.add(newGamePanel_8);
+
+		JLabel lblWinningSequence = new JLabel("Winning sequence:");
+		newGamePanel_8.add(lblWinningSequence);
+
+		JSpinner spinner_2 = new JSpinner();
+		newGamePanel_8.add(spinner_2);
+
+		int reply = JOptionPane.showConfirmDialog(this, newGamePanelRoot, "New Game", JOptionPane.PLAIN_MESSAGE);
+		System.out.println(reply);
+		if (gameSelect.getSelection() == rdbtnNewGame.getModel()) {
+			System.out.println("New custom game");
+		} else {
+			System.out.println("Loaded game");
+			loadGame(new File("currentGame.txt"));
+		}
+		System.out.println(player1name.getText());
 	}
 
 	private void menu_file_new() {
-		// TODO
+		showNewGameDialog();
 	}
 
 	private void menu_game_undo() {
@@ -167,6 +269,7 @@ public class ConnectNGameFrame extends JFrame {
 		try {
 			this.game = new ConnectNGame(loadFile);
 			this.players = game.getPlayers();
+			displayButtons();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "There is no available game file.");
 			e.printStackTrace();
