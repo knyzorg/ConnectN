@@ -114,9 +114,9 @@ public class ConnectNGameFrame extends JFrame {
 
 		loadGame(new File("currentGame.txt"));
 		this.setVisible(true);
-
-		JPanel newGameDialog = new JPanel();
-		newGameDialog.setVisible(true);
+		JOptionPane.showMessageDialog(this,
+		new ConnectNGameNewGameDialog(), "New Game",
+		JOptionPane.PLAIN_MESSAGE);
 		displayButtons();
 	}
 
