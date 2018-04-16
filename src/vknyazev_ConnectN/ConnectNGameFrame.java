@@ -114,19 +114,22 @@ public class ConnectNGameFrame extends JFrame {
 
 		loadGame(new File("currentGame.txt"));
 		this.setVisible(true);
+
+		JPanel newGameDialog = new JPanel();
+		newGameDialog.setVisible(true);
 		displayButtons();
 	}
 
 	// Handler methods for menu
 	private void menu_file_quit() {
-
+		System.exit(0);
 	}
 
 	private void menu_file_save() {
 		try {
 			this.game.save();
 		} catch (Exception e) {
-			//TODO: handle exception
+			JOptionPane.showMessageDialog(this, "Could not save to file.");
 		}
 		
 	}
@@ -136,7 +139,7 @@ public class ConnectNGameFrame extends JFrame {
 			this.game.restore();
 			displayButtons();
 		} catch (Exception e) {
-			//TODO: handle exception
+			JOptionPane.showMessageDialog(this, "There is no available game file.");
 		}
 		
 	}
@@ -165,7 +168,7 @@ public class ConnectNGameFrame extends JFrame {
 			this.game = new ConnectNGame(loadFile);
 			this.players = game.getPlayers();
 		} catch (IOException e) {
-			//TODO: Handle lack of file
+			JOptionPane.showMessageDialog(this, "There is no available game file.");
 			e.printStackTrace();
 		}
 	}
