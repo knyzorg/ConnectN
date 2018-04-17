@@ -213,7 +213,7 @@ public class ConnectNGame {
 		} // if
 
 		// If the move caused a victory, rotate the turn to make acc
-		if (this.getGameState() == GameState.Ended)
+		if (this.getGameState() == GameState.Ended || this.getGameState() == GameState.EndedTie)
 			this.alternateTurn();
 
 		return PlayResult.Okay;
@@ -224,7 +224,7 @@ public class ConnectNGame {
 	 */
 	private boolean checkDiagLR() {
 		for (int col = this.n; col <= this.getBoardDimensions()[1]; col++) {
-			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n + 1; row++) {
 				char search = getCell(row, col);
 				boolean okay = true;
 				// It is pointless to continue if it is null
@@ -249,8 +249,8 @@ public class ConnectNGame {
 	 * Checks if there are n checkers in a row in a diagonal from the upper right to the bottom left
 	 */
 	private boolean checkDiagRL() {
-		for (int col = 1; col <= this.getBoardDimensions()[1] - this.n; col++) {
-			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+		for (int col = 1; col <= this.getBoardDimensions()[1] - this.n + 1; col++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n + 1; row++) {
 				char search = getCell(row, col);
 				boolean okay = true;
 
@@ -277,7 +277,7 @@ public class ConnectNGame {
 	 */
 	private boolean checkColumns() {
 		for (int col = 1; col <= this.getBoardDimensions()[1]; col++) {
-			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n; row++) {
+			for (int row = 1; row <= this.getBoardDimensions()[0] - this.n + 1; row++) {
 				char search = getCell(row, col);
 				boolean okay = true;
 
@@ -305,7 +305,7 @@ public class ConnectNGame {
 	 */
 	private boolean checkRows() {
 		for (int row = 1; row <= this.getBoardDimensions()[0]; row++) {
-			for (int col = 1; col <= this.getBoardDimensions()[1] - this.n; col++) {
+			for (int col = 1; col <= this.getBoardDimensions()[1] - this.n + 1; col++) {
 				char search = getCell(row, col);
 				boolean okay = true;
 
@@ -466,10 +466,12 @@ public class ConnectNGame {
 	 */
 	public boolean undo() {
 		if (this.lastTurn != null) {
+			// If game has ended, alternating the turn breaks things
+			if (this.getGameState() == GameState.Playable)
+				// Go to other player
+				this.alternateTurn();
 			// Set last turn's checker to null
 			setCell(lastTurn[0], lastTurn[1], '\u0000');
-			// Go to other player
-			this.alternateTurn();
 			// Report success
 			return true;
 		} else {
@@ -488,6 +490,7 @@ public class ConnectNGame {
 		try {
 			return boardState[row - 1][col - 1];
 		} catch (Exception e) {
+			System.out.println("BREAK");
 			return '\u0000';
 		} // try
 	} // getCell

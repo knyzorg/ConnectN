@@ -161,14 +161,14 @@ public class ConnectNGameFrame extends JFrame {
 		gameSelect.add(rdbtnNewGame);
 		gameSelect.add(rdbtnLoadFromFile);
 
-		JPanel newGamePanel_1 = new JPanel();
-		newGamePanelRoot.add(newGamePanel_1, BorderLayout.CENTER);
-		newGamePanel_1.setLayout(new GridLayout(0, 2, 0, 0));
+		JPanel gameConfigPanel = new JPanel();
+		newGamePanelRoot.add(gameConfigPanel, BorderLayout.CENTER);
+		gameConfigPanel.setLayout(new GridLayout(0, 2, 0, 0));
 
 		JPanel newGamePanel_6 = new JPanel();
 		FlowLayout flowLayout_4 = (FlowLayout) newGamePanel_6.getLayout();
 		flowLayout_4.setAlignment(FlowLayout.LEFT);
-		newGamePanel_1.add(newGamePanel_6);
+		gameConfigPanel.add(newGamePanel_6);
 
 		JPanel newGamePanel_7 = new JPanel();
 		newGamePanel_6.add(newGamePanel_7);
@@ -183,7 +183,7 @@ public class ConnectNGameFrame extends JFrame {
 		JPanel newGamePanel_4 = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) newGamePanel_4.getLayout();
 		flowLayout.setAlignment(FlowLayout.LEFT);
-		newGamePanel_1.add(newGamePanel_4);
+		gameConfigPanel.add(newGamePanel_4);
 
 		JPanel newGamePanel_10 = new JPanel();
 		newGamePanel_4.add(newGamePanel_10);
@@ -191,9 +191,9 @@ public class ConnectNGameFrame extends JFrame {
 		JLabel lblRows = new JLabel("Rows:");
 		newGamePanel_10.add(lblRows);
 
-		JSpinner spinner = new JSpinner();
-		newGamePanel_10.add(spinner);
-		spinner.setModel(new SpinnerNumberModel(5, 4, 8, 1));
+		JSpinner rowCountSpinner = new JSpinner();
+		newGamePanel_10.add(rowCountSpinner);
+		rowCountSpinner.setModel(new SpinnerNumberModel(5, 4, 8, 1));
 
 		JPanel newGamePanel_9 = new JPanel();
 		newGamePanel_4.add(newGamePanel_9);
@@ -201,21 +201,21 @@ public class ConnectNGameFrame extends JFrame {
 		JLabel lblColumns = new JLabel("Columns:");
 		newGamePanel_9.add(lblColumns);
 
-		JSpinner spinner_1 = new JSpinner();
-		newGamePanel_9.add(spinner_1);
+		JSpinner columnCountSpinner = new JSpinner();
+		newGamePanel_9.add(columnCountSpinner);
 
 		JPanel newGamePanel_3 = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) newGamePanel_3.getLayout();
 		flowLayout_1.setAlignment(FlowLayout.LEFT);
-		newGamePanel_1.add(newGamePanel_3);
+		gameConfigPanel.add(newGamePanel_3);
 
 		JPanel newGamePanel_5 = new JPanel();
 		newGamePanel_3.add(newGamePanel_5);
 		FlowLayout flowLayout_3 = (FlowLayout) newGamePanel_5.getLayout();
 		flowLayout_3.setAlignment(FlowLayout.LEFT);
 
-		JLabel lblPlayerName_1 = new JLabel("Player 2 name:");
-		newGamePanel_5.add(lblPlayerName_1);
+		JLabel lblPlayer2Name = new JLabel("Player 2 name:");
+		newGamePanel_5.add(lblPlayer2Name);
 
 		player2name = new JTextField();
 		newGamePanel_5.add(player2name);
@@ -224,23 +224,32 @@ public class ConnectNGameFrame extends JFrame {
 		JPanel newGamePanel_2 = new JPanel();
 		FlowLayout flowLayout_2 = (FlowLayout) newGamePanel_2.getLayout();
 		flowLayout_2.setAlignment(FlowLayout.LEFT);
-		newGamePanel_1.add(newGamePanel_2);
+		gameConfigPanel.add(newGamePanel_2);
 
-		JPanel newGamePanel_8 = new JPanel();
-		newGamePanel_2.add(newGamePanel_8);
+		JPanel nSelectPanel = new JPanel();
+		newGamePanel_2.add(nSelectPanel);
 
 		JLabel lblWinningSequence = new JLabel("Winning sequence:");
-		newGamePanel_8.add(lblWinningSequence);
+		nSelectPanel.add(lblWinningSequence);
 
-		JSpinner spinner_2 = new JSpinner();
-		newGamePanel_8.add(spinner_2);
+		JSpinner nSpinner = new JSpinner();
+		nSelectPanel.add(nSpinner);
 
 		int reply = JOptionPane.showConfirmDialog(this, newGamePanelRoot, "New Game", JOptionPane.PLAIN_MESSAGE);
-		System.out.println(reply);
+		if (reply == -1) {
+			// Dialog has been closed
+			return;
+		}
+
+		System.out.println((Integer) columnCountSpinner.getValue());
 		if (gameSelect.getSelection() == rdbtnNewGame.getModel()) {
-			System.out.println("New custom game");
+			int cols = (Integer) columnCountSpinner.getValue();
+			int rows = (Integer) rowCountSpinner.getValue();
+			int n = (Integer) nSpinner.getValue();
+			String p1Name = player1name.getText();
+			String p2Name = player2name.getText();
+			createGame(cols, rows, n, p1Name, p2Name);
 		} else {
-			System.out.println("Loaded game");
 			loadGame(new File("currentGame.txt"));
 		}
 		System.out.println(player1name.getText());
@@ -258,11 +267,27 @@ public class ConnectNGameFrame extends JFrame {
 	}
 
 	private void menu_information_help() {
-		// TODO
+		showHelpDialog();
 	}
 
 	private void menu_information_about() {
-		// TODO
+		showAboutDialog();
+	}
+
+	private void showAboutDialog() {
+		JPanel infoDialog = new JPanel();
+		infoDialog.setLayout(new FlowLayout());
+		JLabel text = new JLabel("ConnectN by Slava Knyazev 2018 Heritage College");
+		infoDialog.add(text);
+		JOptionPane.showMessageDialog(this, infoDialog);
+	}
+
+	private void showHelpDialog() {
+		JPanel infoDialog = new JPanel();
+		infoDialog.setLayout(new FlowLayout());
+		JLabel text = new JLabel("<html><h2>ConnectN</h2><p>ConnectN is a rehash of Connect 4 where the '4' is an arbitrary number of your choosing.</p><p>To place a checker, simply click on the button.</p></html>");
+		infoDialog.add(text);
+		JOptionPane.showMessageDialog(this, infoDialog);
 	}
 
 	private void loadGame(File loadFile) {
@@ -286,8 +311,9 @@ public class ConnectNGameFrame extends JFrame {
 
 		this.players = players;
 		game.setPlayers(players);
-
+		game.setSaveFile(new File("currentGame.txt"));
 		this.game = game;
+		displayButtons();
 	}
 
 	private void displayButtons() {
@@ -306,12 +332,7 @@ public class ConnectNGameFrame extends JFrame {
 				JButton btn = btnTable[row][col];
 				btn.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						ConnectNGame.PlayResult p = game.play(playRow, playCol);
-						System.out.println(p);
-
-						// Re-display board
-						displayButtons();
-
+						play(playRow, playCol);
 					}
 				});
 
@@ -322,25 +343,48 @@ public class ConnectNGameFrame extends JFrame {
 		revalidate();
 	}
 
+	private void play(int playRow, int playCol) {
+		ConnectNGame.PlayResult p = game.play(playRow, playCol);
+
+		// Re-display board
+		displayButtons();
+
+		switch (game.getGameState()) {
+		case Playable:
+			// Nothing happens
+			break;
+		case Invalid:
+			JOptionPane.showMessageDialog(this, "Something just went horribly wrong.");
+			break;
+		case EndedTie:
+			JOptionPane.showMessageDialog(this, "It is a tie!!!");
+			break;
+		case Ended:
+			JOptionPane.showMessageDialog(this, game.getCurrentPlayer().getName() + " wins!!");
+			break;
+		}
+	}
+
 	private JButton[][] getButtonTableFromState(CheckerState state[][]) {
 		JButton btnTable[][] = new JButton[state.length][state[0].length];
 
 		for (int row = 0; row < state.length; row++)
 			for (int col = 0; col < state[row].length; col++) {
 				JButton btn = new JButton();
-				btn.setText(row + " " + col + state[row][col]);
 				btn.setEnabled(false);
 				switch (state[row][col]) {
 				case Enabled:
 					btn.setEnabled(true);
+					btn.setBackground(Color.WHITE);
 					break;
 				case Player1:
 					btn.setBackground(Color.YELLOW);
 					break;
 				case Player2:
-					btn.setBackground(Color.RED);
+					btn.setBackground(Color.BLUE);
 					break;
 				case Disabled:
+				btn.setBackground(Color.GRAY);
 					break;
 				}
 				btn.putClientProperty("row", row + 1);
