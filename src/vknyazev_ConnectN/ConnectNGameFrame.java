@@ -3,9 +3,9 @@ package vknyazev_ConnectN;
 import java.awt.*;
 import vknyazev_ConnectN.ConnectNGame.GameState;
 import javax.swing.*;
+import javax.swing.event.*;
 import java.io.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class ConnectNGameFrame extends JFrame {
 	enum CheckerState {
@@ -17,6 +17,10 @@ public class ConnectNGameFrame extends JFrame {
 	private JPanel contentPane;
 	private ConnectNGame game;
 	private Player players[];
+
+	JComboBox<Integer> rowCountSpinner = new JComboBox<Integer>(new Integer[]{4, 5, 6, 7,  8, 9, 10, 11, 12});
+	JComboBox<Integer> columnCountSpinner = new JComboBox<Integer>(new Integer[]{4, 5, 6, 7,  8, 9, 10, 11, 12});
+	JComboBox<Integer> nSpinner = new JComboBox<Integer>(new Integer[]{3});
 
 	JPanel boardPanel = new JPanel();
 
@@ -142,6 +146,19 @@ public class ConnectNGameFrame extends JFrame {
 
 	}
 
+	private void updateNewGameDialogDropdowns() {
+		int cols = (Integer) columnCountSpinner.getSelectedItem();
+		int rows = (Integer) rowCountSpinner.getSelectedItem();
+		int nMax = cols < rows ? cols : rows;
+		if (nMax > 8) 
+			nMax = 9;
+		
+		nSpinner.removeAllItems();
+		for (int i = 3; i < nMax; i++) {
+			nSpinner.addItem(i);
+		}
+	}
+
 	private void showNewGameDialog() {
 
 		JPanel newGamePanelRoot = new JPanel();
@@ -173,7 +190,7 @@ public class ConnectNGameFrame extends JFrame {
 		JPanel newGamePanel_7 = new JPanel();
 		newGamePanel_6.add(newGamePanel_7);
 
-		JLabel lblPlayerName = new JLabel("Player 1 name:");
+		JLabel lblPlayerName = new JLabel("[YELLOW] Player 1 name:");
 		newGamePanel_7.add(lblPlayerName);
 
 		player1name = new JTextField();
@@ -191,9 +208,8 @@ public class ConnectNGameFrame extends JFrame {
 		JLabel lblRows = new JLabel("Rows:");
 		newGamePanel_10.add(lblRows);
 
-		JSpinner rowCountSpinner = new JSpinner();
 		newGamePanel_10.add(rowCountSpinner);
-		rowCountSpinner.setModel(new SpinnerNumberModel(5, 4, 8, 1));
+		
 
 		JPanel newGamePanel_9 = new JPanel();
 		newGamePanel_4.add(newGamePanel_9);
@@ -201,7 +217,6 @@ public class ConnectNGameFrame extends JFrame {
 		JLabel lblColumns = new JLabel("Columns:");
 		newGamePanel_9.add(lblColumns);
 
-		JSpinner columnCountSpinner = new JSpinner();
 		newGamePanel_9.add(columnCountSpinner);
 
 		JPanel newGamePanel_3 = new JPanel();
@@ -214,7 +229,7 @@ public class ConnectNGameFrame extends JFrame {
 		FlowLayout flowLayout_3 = (FlowLayout) newGamePanel_5.getLayout();
 		flowLayout_3.setAlignment(FlowLayout.LEFT);
 
-		JLabel lblPlayer2Name = new JLabel("Player 2 name:");
+		JLabel lblPlayer2Name = new JLabel("[RED] Player 2 name:");
 		newGamePanel_5.add(lblPlayer2Name);
 
 		player2name = new JTextField();
@@ -232,8 +247,20 @@ public class ConnectNGameFrame extends JFrame {
 		JLabel lblWinningSequence = new JLabel("Winning sequence:");
 		nSelectPanel.add(lblWinningSequence);
 
-		JSpinner nSpinner = new JSpinner();
 		nSelectPanel.add(nSpinner);
+
+		columnCountSpinner.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				updateNewGameDialogDropdowns();
+			}
+		});
+
+		rowCountSpinner.addActionListener(new ActionListener(){
+			
+			public void actionPerformed(ActionEvent e) {
+				updateNewGameDialogDropdowns();
+			}
+		});
 
 		int reply = JOptionPane.showConfirmDialog(this, newGamePanelRoot, "New Game", JOptionPane.PLAIN_MESSAGE);
 		if (reply == -1) {
@@ -241,11 +268,12 @@ public class ConnectNGameFrame extends JFrame {
 			return;
 		}
 
-		System.out.println((Integer) columnCountSpinner.getValue());
+		
+		
 		if (gameSelect.getSelection() == rdbtnNewGame.getModel()) {
-			int cols = (Integer) columnCountSpinner.getValue();
-			int rows = (Integer) rowCountSpinner.getValue();
-			int n = (Integer) nSpinner.getValue();
+			int cols = (Integer) columnCountSpinner.getSelectedItem();
+			int rows = (Integer) rowCountSpinner.getSelectedItem();
+			int n = (Integer) nSpinner.getSelectedItem();
 			String p1Name = player1name.getText();
 			String p2Name = player2name.getText();
 			createGame(cols, rows, n, p1Name, p2Name);
@@ -381,7 +409,7 @@ public class ConnectNGameFrame extends JFrame {
 					btn.setBackground(Color.YELLOW);
 					break;
 				case Player2:
-					btn.setBackground(Color.BLUE);
+					btn.setBackground(Color.RED);
 					break;
 				case Disabled:
 				btn.setBackground(Color.GRAY);
