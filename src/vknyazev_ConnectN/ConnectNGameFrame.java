@@ -322,6 +322,10 @@ public class ConnectNGameFrame extends JFrame {
 		try {
 			this.game = new ConnectNGame(loadFile);
 			this.players = game.getPlayers();
+			if (game.getGameState() == GameState.Invalid) {
+				JOptionPane.showMessageDialog(this, "The save file is invalid");
+			}
+			
 			displayButtons();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "There is no available game file.");
@@ -382,7 +386,7 @@ public class ConnectNGameFrame extends JFrame {
 			// Nothing happens
 			break;
 		case Invalid:
-			JOptionPane.showMessageDialog(this, "Something just went horribly wrong.");
+			JOptionPane.showMessageDialog(this, "Something just went horribly wrong. Game state has become invalid.");
 			break;
 		case EndedTie:
 			JOptionPane.showMessageDialog(this, "It is a tie!!!");

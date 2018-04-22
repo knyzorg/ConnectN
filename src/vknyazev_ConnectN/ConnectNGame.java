@@ -134,6 +134,7 @@ public class ConnectNGame {
 	 * @param loadFile file to load from
 	 */
 	public void restore() throws IOException {
+		
 		Scanner gameLoader = new Scanner(this.saveFile);
 		int rows = gameLoader.nextInt();
 		int cols = gameLoader.nextInt();
@@ -171,6 +172,9 @@ public class ConnectNGame {
 
 
 		gameLoader.close();
+
+		// Reset last turn
+		this.lastTurn = null;
 	} // loadFromFile
 
 	/**
